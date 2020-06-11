@@ -2,6 +2,6 @@
 {
     public class Coupon
     {
-        public string code { get; internal set; }
+        public string Code { get; set; }
     }
 }

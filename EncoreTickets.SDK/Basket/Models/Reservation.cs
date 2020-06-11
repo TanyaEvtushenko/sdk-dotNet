@@ -1,41 +1,44 @@
 ﻿using System;
 using System.Collections.Generic;
-using EncoreTickets.SDK.Inventory.Models;
 
 namespace EncoreTickets.SDK.Basket.Models
 {
     public class Reservation
     {
-        public int id { get; internal set; }
+        public int Id { get; set; }
 
-        public string venueId { get; internal set; }
+        public int LinkedReservationId { get; set; }
 
-        public string venueName { get; internal set; }
+        public string VenueId { get; set; }
 
-        public string productId { get; internal set; }
+        public string VenueName { get; set; }
 
-        public string productName { get; internal set; }
+        public string ProductId { get; set; }
 
-        public DateTimeOffset date { get; internal set; }
+        public string ProductType { get; set; }
 
-        public int quantity { get; internal set; }
+        public string ProductName { get; set; }
 
-        public List<Seat> items { get; internal set; }
+        public DateTimeOffset Date { get; set; }
 
-        public Price faceValueInOfficeCurrency { get; internal set; }
+        public int Quantity { get; set; }
 
-        public Price faceValueInShopperCurrency { get; internal set; }
+        public List<Seat> Items { get; set; }
 
-        public Price salePriceInOfficeCurrency { get; internal set; }
+        public Price FaceValueInOfficeCurrency { get; set; }
 
-        public Price salePriceInShopperCurrency { get; internal set; }
+        public Price FaceValueInShopperCurrency { get; set; }
 
-        public Price adjustedSalePriceInOfficeCurrency { get; internal set; }
+        public Price SalePriceInOfficeCurrency { get; set; }
 
-        public Price adjustedSalePriceInShopperCurrency { get; internal set; }
+        public Price SalePriceInShopperCurrency { get; set; }
 
-        public Price adjustmentAmountInOfficeCurrency { get; internal set; }
+        public Price AdjustedSalePriceInOfficeCurrency { get; set; }
 
-        public Price adjustmentAmountInShopperCurrency { get; internal set; }
+        public Price AdjustedSalePriceInShopperCurrency { get; set; }
+
+        public Price AdjustmentAmountInOfficeCurrency { get; set; }
+
+        public Price AdjustmentAmountInShopperCurrency { get; set; }
     }
 }

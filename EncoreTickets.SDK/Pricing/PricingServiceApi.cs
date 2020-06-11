@@ -1,48 +1,49 @@
 ﻿using EncoreTickets.SDK.Api;
-using EncoreTickets.SDK.Api.Context;
-using EncoreTickets.SDK.Api.Helpers;
-using EncoreTickets.SDK.Api.Results;
-using EncoreTickets.SDK.Authentication;
+using EncoreTickets.SDK.Api.Models;
+using EncoreTickets.SDK.Api.Results.Response;
+using EncoreTickets.SDK.Api.Utilities.RequestExecutor;
 using EncoreTickets.SDK.Pricing.Models;
 using EncoreTickets.SDK.Pricing.Models.RequestModels;
+using EncoreTickets.SDK.Utilities.Enums;
 
 namespace EncoreTickets.SDK.Pricing
 {
-    /// <inheritdoc/>
+    /// <inheritdoc cref="BaseApiWithAuthentication" />
+    /// <inheritdoc cref="IPricingServiceApi" />
     /// <summary>
     /// The service to provide an interface for calling Pricing API endpoints.
     /// </summary>
-    public class PricingServiceApi : BaseApi
+    public class PricingServiceApi : BaseApiWithAuthentication, IPricingServiceApi
     {
-        private const string PricingHost = "pricing-service.{0}tixuk.io/api/";
+        private const string PricingApiHost = "pricing-service.{0}tixuk.io/api/";
+        private const string DateFormat = "yyyy-MM-ddTHH:mm:sszzz";
 
-        private readonly string DateFormat = "yyyy-MM-ddTHH:mm:sszzz";
+        /// <inheritdoc />
+        public override int? ApiVersion => 3;
 
         /// <summary>
-        /// Gets the authentication service for the current Pricing service./>
+        /// Default constructor.
         /// </summary>
-        public AuthenticationService AuthenticationService { get; }
-
-        public PricingServiceApi(ApiContext context) : base(context, PricingHost)
+        /// <param name="context"></param>
+        /// /// <param name="automaticAuthentication"></param>
+        public PricingServiceApi(ApiContext context, bool automaticAuthentication = false)
+            : base(context, PricingApiHost, automaticAuthentication)
         {
-            context.AuthenticationMethod = AuthenticationMethod.JWT;
-            AuthenticationService = new AuthenticationService(context, PricingHost, "login");
         }
 
-        /// <summary>
-        /// Returns a page with exchange rates
-        /// Authorization required.
-        /// </summary>
-        /// <returns>Exchange rates.</returns>
-        public ResponseForPage<ExchangeRate> GetExchangeRates(ExchangeRatesParameters parameters)
+        /// <inheritdoc />
+        public ResponseForPage<ExchangeRate> GetExchangeRates(ExchangeRatesParameters ratesParameters)
         {
-            var result = Executor.ExecuteApi<ResponseForPage<ExchangeRate>>(
-                "v2/admin/exchange_rates",
-                RequestMethod.Get,
-                true,
-                query: parameters,
-                dateFormat: DateFormat);
-            return result.Data;
+            TriggerAutomaticAuthentication();
+            var parameters = new ExecuteApiRequestParameters
+            {
+                Endpoint = $"v{ApiVersion}/admin/exchange_rates",
+                Method = RequestMethod.Get,
+                Query = ratesParameters,
+                DateFormat = DateFormat
+            };
+            var result = Executor.ExecuteApiWithWrappedResponse<ResponseForPage<ExchangeRate>>(parameters);
+            return result.DataOrException;
         }
     }
 }

@@ -1,95 +1,162 @@
 ﻿using System;
 using System.Collections.Generic;
 using EncoreTickets.SDK.Api;
-using EncoreTickets.SDK.Api.Context;
-using EncoreTickets.SDK.Api.Helpers;
+using EncoreTickets.SDK.Api.Models;
+using EncoreTickets.SDK.Api.Utilities.RequestExecutor;
 using EncoreTickets.SDK.Inventory.Models;
+using EncoreTickets.SDK.Inventory.Models.RequestModels;
 using EncoreTickets.SDK.Inventory.Models.ResponseModels;
-using EncoreTickets.SDK.Utilities;
+using EncoreTickets.SDK.Utilities.BaseTypesExtensions;
+using EncoreTickets.SDK.Utilities.Enums;
 
 namespace EncoreTickets.SDK.Inventory
 {
+    /// <inheritdoc cref="BaseApi" />
+    /// <inheritdoc cref="IInventoryServiceApi" />
     /// <summary>
     /// Wrapper class for the inventory service API
     /// </summary>
-    public class InventoryServiceApi : BaseApi
+    public class InventoryServiceApi : BaseApi, IInventoryServiceApi
     {
+        private const string InventoryApiHost = "inventory-service.{0}tixuk.io/api/";
+
+        /// <inheritdoc/>
+        public override int? ApiVersion => 4;
+
         /// <summary>
         /// Default constructor for the Inventory service
         /// </summary>
         /// <param name="context"></param>
-        public InventoryServiceApi(ApiContext context) : base(context, "inventory-service.{0}tixuk.io/api/") { }
-
-        public InventoryServiceApi(ApiContext context, string baseUrl) : base(context, baseUrl) { }
-
-        /// <summary>
-        /// Search for a product
-        /// </summary>
-        /// <param name="text"></param>
-        /// <returns></returns>
-        public IList<Product> Search(string text)
+        public InventoryServiceApi(ApiContext context) : base(context, InventoryApiHost)
         {
-            var result = Executor.ExecuteApiList<SearchResponse>(
-                $"v2/search?query={text}",
-                RequestMethod.Get, 
-                false);
-            return result.GetList<Product>();
         }
 
-        /// <summary>
-        /// Get the performances for a given product.
-        /// </summary>
-        /// <param name="productId"></param>
-        /// <param name="quantity"></param>
-        /// <param name="from"></param>
-        /// <param name="to"></param>
-        /// <returns></returns>
-        public IList<Performance> GetPerformances(int productId, int quantity, DateTime from, DateTime to)
+        /// <inheritdoc />
+        public IList<Product> SearchProducts(string text)
         {
-            return GetPerformances(productId.ToString(), quantity, from, to);
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                throw new ArgumentException("search text must be set");
+            }
+
+            var requestParameters = new ExecuteApiRequestParameters
+            {
+                Endpoint = $"v{ApiVersion}/search",
+                Method = RequestMethod.Get,
+                Query = new
+                {
+                    query = text
+                }
+            };
+            var result = Executor.ExecuteApiWithWrappedResponse<List<Product>, ProductSearchResponse, ProductSearchResponseContent>(requestParameters);
+            return result.DataOrException;
         }
 
-        /// <summary>
-        /// Get the performances for a given product.
-        /// </summary>
-        /// <param name="productId"></param>
-        /// <param name="quantity"></param>
-        /// <param name="from"></param>
-        /// <param name="to"></param>
-        /// <returns></returns>
-        public IList<Performance> GetPerformances(string productId, int quantity, DateTime from, DateTime to)
+        /// <inheritdoc />
+        public AvailabilityRange GetAvailabilityRange(int productId)
         {
-            var path = $"v2/availability/products/{productId}/quantity/{quantity}/from/{from.ToEncoreDate()}/to/{to.ToEncoreDate()}";
-            var result = Executor.ExecuteApiList<List<Performance>>(path, RequestMethod.Get, false);
-            return result.GetList<Performance>();
+            return GetAvailabilityRange(productId.ToString());
         }
 
-        /// <summary>
-        /// Get the seats for a performance
-        /// </summary>
-        /// <param name="productId"></param>
-        /// <param name="quantity"></param>
-        /// <param name="performance"></param>
-        /// <returns></returns>
-        public Availability GetAvailability(string productId, int quantity, DateTime performance)
+        /// <inheritdoc />
+        public AvailabilityRange GetAvailabilityRange(string productId)
         {
-            var path = $"v1/availability/products/{productId}/quantity/{quantity}/seats?date={performance.ToEncoreDate()}&time={performance.ToEncoreTime()}";
-            var result = Executor.ExecuteApi<Availability>(path, RequestMethod.Get, false);
-            return result.Data;
+            if (string.IsNullOrWhiteSpace(productId))
+            {
+                throw new ArgumentException("Product ID must be set");
+            }
+
+            var parameters = new ExecuteApiRequestParameters
+            {
+                Endpoint = $"v{ApiVersion}/products/{productId}/availability-range",
+                Method = RequestMethod.Get
+            };
+            var result = Executor.ExecuteApiWithWrappedResponse<AvailabilityRange>(parameters);
+            return result.DataOrException;
         }
 
-        /// <summary>
-        /// Get the first and last bookable dates for a product
-        /// </summary>
-        /// <param name="productId"></param>
-        /// <returns></returns>
-        public BookingRange GetBookingRange(string productId)
+        /// <inheritdoc />
+        public IList<Availability> GetAvailabilities(int productId, int quantity, DateTime fromDate, DateTime toDate)
         {
-            var result = Executor.ExecuteApi<BookingRange>(
-                $"v3/products/{productId}/availability-range",
-                RequestMethod.Get,
-                true);
-            return result.Data;
+            return GetAvailabilities(productId.ToString(), quantity, fromDate, toDate);
+        }
+
+        /// <inheritdoc />
+        public IList<Availability> GetAvailabilities(string productId, int quantity, DateTime from, DateTime to)
+        {
+            if (string.IsNullOrWhiteSpace(productId))
+            {
+                throw new ArgumentException("Product ID must be set");
+            }
+
+            var requestParameters = new ExecuteApiRequestParameters
+            {
+                Endpoint = $"v{ApiVersion}/availability/products/{productId}/quantity/{quantity}/from/{from.ToEncoreDate()}/to/{to.ToEncoreDate()}",
+                Method = RequestMethod.Get
+            };
+            var result = Executor.ExecuteApiWithWrappedResponse<List<Availability>>(requestParameters);
+            return result.DataOrException;
+        }
+
+        /// <inheritdoc />
+        public AggregateSeatAvailability GetAggregateSeatAvailability(string productId, int quantity, DateTime performance)
+        {
+            var parameters = new AggregateSeatAvailabilityParameters
+            {
+                PerformanceTime = performance,
+                Quantity = quantity
+            };
+            return GetAggregateSeatAvailability(productId, parameters);
+        }
+
+        /// <inheritdoc />
+        public AggregateSeatAvailability GetAggregateSeatAvailability(string productId, AggregateSeatAvailabilityParameters parameters)
+        {
+            if (string.IsNullOrWhiteSpace(productId))
+            {
+                throw new ArgumentException("Product ID must be set");
+            }
+
+            if (parameters == null)
+            {
+                throw new ArgumentException("Parameters must be set");
+            }
+
+            var requestParameters = new ExecuteApiRequestParameters
+            {
+                Endpoint = $"v{ApiVersion}/products/{productId}/areas",
+                Method = RequestMethod.Get,
+                Query = new AggregateSeatAvailabilityQueryParameters(parameters)
+            };
+            var result = Executor.ExecuteApiWithWrappedResponse<AggregateSeatAvailability>(requestParameters);
+            return result.DataOrException;
+        }
+
+        /// <inheritdoc />
+        [Obsolete("Please use the GetAggregateSeatAvailability method. The data returned by this method is not compatible with the latest basket service.")]
+        public SeatAvailability GetSeatAvailability(string productId, int quantity, DateTime? performance = null)
+        {
+            var optionalParameters = new SeatAvailabilityParameters { PerformanceTime = performance };
+            return GetSeatAvailability(productId, quantity, optionalParameters);
+        }
+
+        /// <inheritdoc />
+        [Obsolete("Please use the GetAggregateSeatAvailability method. The data returned by this method is not compatible with the latest basket service.")]
+        public SeatAvailability GetSeatAvailability(string productId, int quantity, SeatAvailabilityParameters parameters)
+        {
+            if (string.IsNullOrWhiteSpace(productId))
+            {
+                throw new ArgumentException("Product ID must be set");
+            }
+
+            var requestParameters = new ExecuteApiRequestParameters
+            {
+                Endpoint = $"v{ApiVersion}/europa/availability/products/{productId}/quantity/{quantity}/seats",
+                Method = RequestMethod.Get,
+                Query = new SeatAvailabilityQueryParameters(parameters)
+            };
+            var result = Executor.ExecuteApiWithWrappedResponse<SeatAvailability>(requestParameters);
+            return result.DataOrException;
         }
     }
 }

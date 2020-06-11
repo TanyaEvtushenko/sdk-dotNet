@@ -1,11 +1,9 @@
-﻿using EncoreTickets.SDK.Inventory.Models;
-
-namespace EncoreTickets.SDK.Basket.Models
+﻿namespace EncoreTickets.SDK.Basket.Models
 {
     public class Delivery
     {
-        public string method { get; internal set; }
+        public string Method { get; set; }
 
-        public Price charge { get; internal set; }
+        public Price Charge { get; set; }
     }
 }

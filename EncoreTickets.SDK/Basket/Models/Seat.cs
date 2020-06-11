@@ -2,16 +2,16 @@
 {
     public class Seat
     {
-        public string aggregateReference { get; internal set; }
+        public string AggregateReference { get; set; }
 
-        public string blockId { get; internal set; }
+        public string AreaId { get; set; }
 
-        public string blockName { get; internal set; }
+        public string AreaName { get; set; }
 
-        public string row { get; internal set; }
+        public string Row { get; set; }
 
-        public string number { get; internal set; }
+        public string Number { get; set; }
 
-        public string locationDescription { get; internal set; }
+        public string LocationDescription { get; set; }
     }
 }

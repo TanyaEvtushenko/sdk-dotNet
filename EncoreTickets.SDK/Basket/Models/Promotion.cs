@@ -1,24 +1,23 @@
 ﻿using System;
-using EncoreTickets.SDK.Interfaces;
 
 namespace EncoreTickets.SDK.Basket.Models
 {
-    public class Promotion : IIdentifiableObject
+    public class Promotion
     {
-        public string id { get; internal set; }
+        public string Id { get; set; }
 
-        public string name { get; internal set; }
+        public string Name { get; set; }
 
-        public string displayText { get; internal set; }
+        public string DisplayText { get; set; }
 
-        public string description { get; internal set; }
+        public string Description { get; set; }
 
-        public string reference { get; internal set; }
+        public string Reference { get; set; }
 
-        public string reportingCode { get; internal set; }
+        public string ReportingCode { get; set; }
 
-        public DateTimeOffset validFrom { get; internal set; }
+        public DateTimeOffset ValidFrom { get; set; }
 
-        public DateTimeOffset validTo { get; internal set; }
+        public DateTimeOffset ValidTo { get; set; }
     }
 }

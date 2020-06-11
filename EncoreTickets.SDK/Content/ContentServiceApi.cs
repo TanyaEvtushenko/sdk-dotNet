@@ -1,76 +1,75 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using EncoreTickets.SDK.Api;
-using EncoreTickets.SDK.Api.Context;
-using EncoreTickets.SDK.Api.Helpers;
+using EncoreTickets.SDK.Api.Models;
+using EncoreTickets.SDK.Api.Utilities.RequestExecutor;
 using EncoreTickets.SDK.Content.Models;
+using EncoreTickets.SDK.Content.Models.RequestModels;
+using EncoreTickets.SDK.Utilities.Enums;
 
 namespace EncoreTickets.SDK.Content
 {
+    /// <inheritdoc cref="BaseApi" />
+    /// <inheritdoc cref="IContentServiceApi" />
     /// <summary>
-    /// Wrapper class for the inventory service API
+    /// The wrapper class for the content service API.
     /// </summary>
-    public class ContentServiceApi : BaseApi
+    public class ContentServiceApi : BaseApi, IContentServiceApi
     {
+        private const string ContentApiHost = "content-service.{0}tixuk.io/api/";
+
+        /// <inheritdoc/>
+        public override int? ApiVersion => 1;
+
         /// <summary>
-        /// Default constructor for the Inventory service
+        /// Default constructor for the content service
         /// </summary>
         /// <param name="context"></param>
-        public ContentServiceApi(ApiContext context) : base(context, "content-service.{0}tixuk.io/api/")
+        public ContentServiceApi(ApiContext context) : base(context, ContentApiHost)
         {
         }
 
-        public ContentServiceApi(ApiContext context, string baseUrl) : base(context, baseUrl)
-        {
-        }
-
-        /// <summary>
-        /// Search for a product
-        /// </summary>
-        /// <returns></returns>
+        /// <inheritdoc />
         public IList<Location> GetLocations()
         {
-            var results = Executor.ExecuteApiList<List<Location>>(
-                "v1/locations",
-                RequestMethod.Get,
-                true);
-            return results.GetList<Location>();
+            var parameters = new ExecuteApiRequestParameters
+            {
+                Endpoint = $"v{ApiVersion}/locations",
+                Method = RequestMethod.Get
+            };
+            var results = Executor.ExecuteApiWithWrappedResponse<List<Location>>(parameters);
+            return results.DataOrException;
         }
 
-        /// <summary>
-        /// Get the available products
-        /// </summary>
-        /// <returns></returns>
-        public IList<Product> GetProducts()
+        /// <inheritdoc />
+        public IList<Product> GetProducts(GetProductsParameters requestParameters = null)
         {
-            var result = Executor.ExecuteApiList<List<Product>>(
-                "v1/products?page=1&limit=1000",
-                RequestMethod.Get, 
-                true);
-            return result.GetList<Product>();
+            requestParameters ??= new GetProductsParameters();
+            var parameters = new ExecuteApiRequestParameters
+            {
+                Endpoint = $"v{ApiVersion}/products",
+                Method = RequestMethod.Get,
+                Query = requestParameters
+            };
+            var result = Executor.ExecuteApiWithWrappedResponse<List<Product>>(parameters);
+            return result.DataOrException;
         }
 
-        /// <summary>
-        /// Get the product by id
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
+        /// <inheritdoc />
         public Product GetProductById(string id)
         {
-            var result = Executor.ExecuteApi<Product>(
-                $"v1/products/{id}",
-                RequestMethod.Get,
-                true);
-            return result.Data;
-        }
+            if (string.IsNullOrEmpty(id))
+            {
+                throw new ArgumentException("product ID must be set");
+            }
 
-        /// <summary>
-        /// Get the product by id
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        public Product GetProductById(int id)
-        {
-            return GetProductById(id.ToString());
+            var parameters = new ExecuteApiRequestParameters
+            {
+                Endpoint = $"v{ApiVersion}/products/{id}",
+                Method = RequestMethod.Get
+            };
+            var result = Executor.ExecuteApiWithWrappedResponse<Product>(parameters);
+            return result.DataOrException;
         }
     }
 }

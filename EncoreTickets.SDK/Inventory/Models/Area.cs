@@ -1,24 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace EncoreTickets.SDK.Inventory.Models
 {
-    public class Area
+    public class Area : BaseArea
     {
-        public int? availableCount { get; set; }
+        public string AggregateReference { get; set; }
 
-        public DateTime? date { get; set; }
+        public string ItemReference { get; set; }
 
-        public string name { get; set; }
+        public bool? IsAvailable { get; set; }
 
-        public string mode { get; set; }
+        public List<Grouping> Groupings { get; set; }
 
-        public bool? isAvailable { get; set; }
-
-        public List<Grouping> groupings { get; set; }
-
-        public string aggregateReference { get; set; }
-
-        public string itemReference { get; set; }
+        public AggregateReference AggregateReferenceObject { get; set; }
     }
 }

@@ -2,26 +2,18 @@
 
 namespace EncoreTickets.SDK.Inventory.Models
 {
-    public class Grouping
+    public class Grouping : BaseGrouping
     {
-        public string aggregateReference { get; set; }
+        public string ItemReference { get; set; }
 
-        public string itemReference { get; set; }
+        public bool? IsAvailable { get; set; }
 
-        public string row { get; set; }
+        public Attributes Attributes { get; set; }
 
-        public int? seatNumberStart { get; set; }
+        public Pricing Pricing { get; set; }
 
-        public int? seatNumberEnd { get; set; }
+        public List<Seat> Seats { get; set; }
 
-        public int? availableCount { get; set; }
-
-        public bool? isAvailable { get; set; }
-
-        public Attributes attributes { get; set; }
-
-        public Pricing pricing { get; set; }
-
-        public List<Seat> seats { get; set; }
+        public AggregateReference AggregateReferenceObject { get; set; }
     }
 }
