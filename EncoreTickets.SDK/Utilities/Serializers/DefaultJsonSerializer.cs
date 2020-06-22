@@ -31,7 +31,7 @@ namespace EncoreTickets.SDK.Utilities.Serializers
             {
                 ContractResolver = new CamelCasePropertyNamesContractResolver(),
                 DateTimeZoneHandling = DateTimeZoneHandling.Utc,
-            };
+            };        
             AddConvertersToSettings(settings, extraConverters, enumNamingStrategy);
             return settings;
         }
