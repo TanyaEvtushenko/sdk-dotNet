@@ -64,3 +64,25 @@ jobs:
 
     - name: Test
       run: vstest.console.exe EncoreTickets.SDK.Tests\bin\Release\${{ matrix.framework_version }}\EncoreTickets.SDK.Tests.dll /TestCaseFilter:"FullyQualifiedName~UnitTests"
+
+
+  check_warnings_in_changed_files:
+
+    name: Check warnings in changed files
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Add dotnet-format problem matcher
+        uses: xt0rted/dotnet-format-problem-matcher@v1
+
+      - name: Restore dotnet tools
+        uses: xt0rted/dotnet-tool-restore@v1
+
+      - name: Run dotnet format
+        uses: xt0rted/dotnet-format@v1
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          action: "check"
+          only-changed-files: "true"
